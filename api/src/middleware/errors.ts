@@ -4,9 +4,12 @@ import { pick } from 'lodash';
 import { CustomError } from 'errors';
 
 export const handleError: ErrorRequestHandler = (error, _req, res, _next) => {
-  console.error(error);
-
   const isErrorSafeForClient = error instanceof CustomError;
+
+  // Only log unexpected errors; expected client errors (4xx) are handled silently
+  if (!isErrorSafeForClient) {
+    console.error(error);
+  }
 
   const clientError = isErrorSafeForClient
     ? pick(error, ['message', 'code', 'status', 'data'])
