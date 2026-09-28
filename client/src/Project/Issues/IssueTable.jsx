@@ -110,7 +110,7 @@ const ProjectIssuesTable = ({ project, issues, sorting, mergeSorting }) => {
               </Cell>
               <Cell>
                 <PriorityCell>
-                  <IssuePriorityIcon priority={issue.priority} top={-1} left={4} />
+                  <IssuePriorityIcon priority={issue.priority} />
                   {IssuePriorityCopy[issue.priority]}
                 </PriorityCell>
               </Cell>

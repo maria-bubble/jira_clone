@@ -8,6 +8,7 @@ import {
   mixin,
 } from 'shared/utils/styles';
 import { InputDebounced, Select, Icon, Avatar } from 'shared/components';
+import { AddMore } from 'shared/components/Select/Styles';
 
 export const IssuesPage = styled.div`
   display: flex;
@@ -28,7 +29,49 @@ export const SearchInput = styled(InputDebounced)`
 
 export const FilterSelect = styled(Select)`
   margin-right: 9px;
-  width: 130px;
+  width: 150px;
+  ${AddMore} {
+    display: none;
+  }
+`;
+
+export const FilterValueChip = styled.div`
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  height: 20px;
+  margin: 2px 4px 2px 0;
+  padding: 0 7px;
+  border-radius: 10px;
+  background: ${color.backgroundMedium};
+  ${font.size(12)}
+  ${font.medium}
+  color: ${color.textDark};
+  ${mixin.clickable}
+  &:hover {
+    background: ${color.borderLight};
+  }
+  i {
+    margin-left: 4px;
+    font-size: 10px;
+    color: ${color.textMedium};
+  }
+`;
+
+export const FilterValueChipLabel = styled.span`
+  margin-right: 5px;
+  ${font.size(11)}
+  ${font.bold}
+  color: ${color.textMedium};
+  text-transform: uppercase;
+  white-space: nowrap;
+`;
+
+export const FilterValueChipText = styled.span`
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;
 
 export const ClearAll = styled.div`
@@ -155,7 +198,12 @@ export const PriorityCell = styled.div`
 
 export const StatusPill = styled.div`
   text-transform: uppercase;
+  max-width: 100%;
+  display: block;
+  height: 24px;
+  line-height: 24px;
   ${props => mixin.tag(issueStatusBackgroundColors[props.color], issueStatusColors[props.color])}
+  ${mixin.truncateText}
 `;
 
 export const DateCell = styled.div`
