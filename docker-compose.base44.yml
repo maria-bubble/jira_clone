@@ -3,14 +3,16 @@
 # on host port 8000 and reached by the browser via its public URL.
 services:
   db:
-    image: postgres:14-alpine
+    # TypeORM 0.2.20 queries the removed `pg_constraint.consrc` column (dropped
+    # in PG 12). PG 11 still has it, so we pin to 11 for compatibility.
+    image: postgres:11-alpine
     restart: on-failure
     environment:
       POSTGRES_USER: jira
       POSTGRES_PASSWORD: jira_dev_password
       POSTGRES_DB: jira_development
-      # pg 7.x (pinned by this project) cannot do scram-sha-256 auth, which PG 14
-      # defaults to. Trust auth bypasses the password exchange for local dev.
+      # pg 7.x (pinned by this project) cannot do scram-sha-256 auth.
+      # Trust auth bypasses the password exchange for local dev.
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - db_data:/var/lib/postgresql/data
