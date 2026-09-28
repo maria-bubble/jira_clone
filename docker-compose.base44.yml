@@ -1,0 +1,76 @@
+# Base44 development environment for the Jira clone.
+# Client (webpack-dev-server) is exposed on host port 3000; the API is exposed
+# on host port 8000 and reached by the browser via its public URL.
+services:
+  db:
+    image: postgres:14-alpine
+    restart: on-failure
+    environment:
+      POSTGRES_USER: jira
+      POSTGRES_PASSWORD: jira_dev_password
+      POSTGRES_DB: jira_development
+      # pg 7.x (pinned by this project) cannot do scram-sha-256 auth, which PG 14
+      # defaults to. Trust auth bypasses the password exchange for local dev.
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jira -d jira_development"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    image: node:12-bullseye
+    restart: on-failure
+    working_dir: /app
+    volumes:
+      - ./api:/app
+    ports:
+      - "8000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: "3000"
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USERNAME: jira
+      DB_PASSWORD: jira_dev_password
+      DB_DATABASE: jira_development
+    env_file:
+      - ./.env.base44-defaults
+      - /run/base44/app.env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "npm install && npm start"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  client:
+    image: node:12-bullseye
+    restart: on-failure
+    working_dir: /app
+    volumes:
+      - ./client:/app
+    ports:
+      - "3000:8080"
+    environment:
+      API_URL: https://8000-${BASE44_PUBLIC_HOST_SUFFIX}
+    command: sh -c "npm install && npm start -- --host 0.0.0.0"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+volumes:
+  db_data:

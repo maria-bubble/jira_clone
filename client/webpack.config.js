@@ -39,12 +39,22 @@ module.exports = {
   },
   devtool: 'eval-source-map',
   devServer: {
+    host: '0.0.0.0',
+    port: 8080,
     contentBase: path.join(__dirname, 'dev'),
     historyApiFallback: true,
     hot: true,
+    disableHostCheck: true,
+    watchOptions: {
+      poll: 1000,
+      aggregateTimeout: 300,
+    },
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
+    new webpack.DefinePlugin({
+      'process.env.API_URL': JSON.stringify(process.env.API_URL || ''),
+    }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'src/index.html'),
       favicon: path.join(__dirname, 'src/favicon.png'),
